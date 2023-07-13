@@ -1,8 +1,7 @@
 import requests
 
-endpoint = 'https://httpbin.org/anything'
+endpoint = 'http://localhost:8000/api/'
 
 response = requests.get(endpoint, json={'query': 'Hello World!'})
 
-print(response.text)
 print(response.json())
