@@ -12,5 +12,5 @@ def api_home(request, *args, **kwargs):
     if serializer.is_valid(raise_exception=True):
         instance = serializer.save()
         print(serializer.data)
-        
+
         return Response(serializer.data)
