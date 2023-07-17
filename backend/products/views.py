@@ -6,7 +6,10 @@ from rest_framework import generics
 from .models import Product
 from .serializers import ProductSerializer
 
-from api.mixins import StaffEditorPermissionMixin
+from api.mixins import (
+        UserQuerysetMixin,
+        StaffEditorPermissionMixin
+    )
 
 
 # class ProductMixinView(
@@ -36,6 +39,7 @@ from api.mixins import StaffEditorPermissionMixin
 
 
 class ProductListCreateAPIView(
+        UserQuerysetMixin,
         StaffEditorPermissionMixin,
         generics.ListCreateAPIView):
 
@@ -51,17 +55,12 @@ class ProductListCreateAPIView(
 
         serializer.save(user=self.request.user, content=content)
 
-    def get_queryset(self, *args, **kwargs):
-        qs = super().get_queryset(*args, **kwargs)
-        request = self.request
-        print(request.user)
-        return qs.filter(user=request.user)
-
 
 product_list_create_view = ProductListCreateAPIView.as_view()
 
 
 class ProductDetailAPIView(
+        UserQuerysetMixin,
         StaffEditorPermissionMixin,
         generics.RetrieveAPIView):
 
@@ -73,6 +72,7 @@ product_detail_view = ProductDetailAPIView.as_view()
 
 
 class ProductUpdateAPIView(
+        UserQuerysetMixin,
         StaffEditorPermissionMixin,
         generics.RetrieveAPIView):
 
@@ -90,6 +90,7 @@ product_update_view = ProductUpdateAPIView.as_view()
 
 
 class ProductDestroyAPIView(
+        UserQuerysetMixin,
         StaffEditorPermissionMixin,
         generics.RetrieveAPIView):
 
