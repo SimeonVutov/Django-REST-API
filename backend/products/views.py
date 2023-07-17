@@ -1,45 +1,46 @@
-from tokenize import Token
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import authentication, generics, mixins, permissions
+from rest_framework import generics
 
 from .models import Product
 from .serializers import ProductSerializer
-from .permissions import IsStaffEditorPermission
-from api.authentication import TokenAuthentication
+
+from api.mixins import StaffEditorPermissionMixin
 
 
-class ProductMixinView(
-        mixins.CreateModelMixin,
-        mixins.ListModelMixin,
-        mixins.RetrieveModelMixin,
-        generics.GenericAPIView):
+# class ProductMixinView(
+#         mixins.CreateModelMixin,
+#         mixins.ListModelMixin,
+#         mixins.RetrieveModelMixin,
+#         generics.GenericAPIView):
+
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     lookup_field = 'pk'
+
+#     def get(self, request, pk=None, *args, **kwargs):
+#         if pk is not None:
+#             return self.retrieve(request, *args, **kwargs)
+#         return self.list(request, *args, **kwargs)
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+
+#     def perform_create(self, serializer):
+#         content = serializer.validated_data.get('content')
+
+#         if content is None:
+#             content = 'This is auto generated content'
+#         serializer.save(content=content)
+
+
+class ProductListCreateAPIView(
+        StaffEditorPermissionMixin,
+        generics.ListCreateAPIView):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_field = 'pk'
-
-    def get(self, request, pk=None, *args, **kwargs):
-        if pk is not None:
-            return self.retrieve(request, *args, **kwargs)
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        content = serializer.validated_data.get('content')
-
-        if content is None:
-            content = 'This is auto generated content'
-        serializer.save(content=content)
-
-
-class ProductListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_create(self, serializer):
         title = serializer.validated_data.get('title')
@@ -51,17 +52,21 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(content=content)
 
 
-class ProductDetailAPIView(generics.RetrieveAPIView):
+class ProductDetailAPIView(
+        StaffEditorPermissionMixin,
+        generics.RetrieveAPIView):
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
 
-class ProductUpdateAPIView(generics.UpdateAPIView):
+class ProductUpdateAPIView(
+        StaffEditorPermissionMixin,
+        generics.RetrieveAPIView):
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_update(self, serializer):
         instance = serializer.save()
@@ -69,11 +74,13 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
             instance.content = instance.title
 
 
-class ProductDestroyAPIView(generics.DestroyAPIView):
+class ProductDestroyAPIView(
+        StaffEditorPermissionMixin,
+        generics.RetrieveAPIView):
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
